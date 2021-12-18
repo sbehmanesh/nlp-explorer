@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Spatiotemporal Search Engine">
+
+	<!-- title -->
+	<title>Spatiotemporal Search Engine</title>
+
+	<!-- favicon -->
+	<link rel="shortcut icon" type="image/png" href="/static/img/logo/fav.png">
+	<!-- google font -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="/static/css/all.min.css">
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+	<!-- main style -->
+	<link rel="stylesheet" href="/static/css/main_search.css">
+	<!-- responsive -->
+	<link rel="stylesheet" href="/static/css/responsive.css">
+
+</head>
+<body>
+	
+	<!--PreLoader-->
+    <div class="loader">
+        <div class="loader-inner">
+            <div class="circle"></div>
+        </div>
+    </div>
+    <!--PreLoader Ends-->
+	
+	<!-- header -->
+	<div class="top-header-area" id="sticker">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12 col-sm-12 text-center">
+					<div class="main-menu-wrap">
+						<!-- logo -->
+						<div class="site-logo">
+							<img src="/static/img/logo/logo_uni.png" alt="">
+						</div>
+						<!-- logo -->
+						<div class="site-logo float_right">
+								<img src="/static/img/logo/logo_vezarat.png" alt="">
+						</div>
+
+						<!-- menu start -->
+						<nav class="main-menu">
+						</nav>
+						<div class="mobile-menu"></div>
+						<!-- menu end -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end header -->
+
+	<div class="title_div">
+		<h2 class="title_h2">Spatiotemporal Search Engine</h2>
+	</div>
+
+	<!-- hero area -->
+	<div class="hero-area hero-bg">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12  text-center">
+					<div class="search-bar ">
+						<form action="/search/" method="post" >
+							{% csrf_token %}
+							<div class="search-bar-tablecell search_div">
+								<input type="text" name="string" placeholder="Search here ...">
+								<button type="submit"> Search <i class="fas fa-search"></i> </button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end hero area -->
+
+	<!-- jquery -->
+	<script src="/static/js/jquery-1.11.3.min.js"></script>
+	<script src="/static/js/main_search.js"></script>
+
+</body>
+</html>
