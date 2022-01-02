@@ -38,6 +38,11 @@ list_of_short_monthes = [
     'dec' 
 ]
 
+blacklist_words = [
+    'and',
+    'or'
+]
+
 def index(request):
     return render(request, 'search/index.html')
     
@@ -46,69 +51,88 @@ def index(request):
 def search(request):
     view_data = {}
     if request.method == "POST":
-        string = request.POST.get('string')
+        main_string = request.POST.get('string')
 
-        types = []
-        locs,dates,titles = extract_locations_and_dates(string)
-        
-        date_prim = month_search(string)
-        for month in date_prim:
-            if month not in dates:
-                dates.append(month)
-        
-        caches = get_features(string)
-        for cache in caches:
-            if cache.type == 'title':
-                if cache.word not in titles:
-                    titles.append(cache.word)
-            if cache.type == 'address':
-                if cache.word not in locs:
-                    locs.append(cache.word)
-            if cache.type == 'date':
-                if cache.word not in dates:
-                    dates.append(cache.word)
-            if cache.type == 'type':
-                if cache.word not in types:
-                    types.append(cache.word)
+        # clean input string from non alpha-numeric characters
+        clean_string = filter(lambda x: x.isalnum() or x.isspace(), main_string)
+        clean_string = "".join(clean_string)
 
+        print(clean_string)
+
+        strings = clean_string.split('and')
+
+        print(strings)
+
+        inter_statements_query = Q()
         keywords = ""
-
-        loc_query = Q()
-        for loc in locs:
-            loc_query = loc_query & Q(address__icontains=loc)
-        if len(locs) != 0:
-            keywords = keywords + " , " + ' , '.join(locs)
-
-        date_query = Q()
-        for date in dates:
-            date_query = date_query & Q(date__icontains=date)
-        if len(dates) != 0:
-            keywords = keywords + " , " + ' , '.join(dates)
-
-        title_query = Q()
-        for title in titles:
-            title_query = title_query & (Q(title__icontains=title) | Q(type__icontains=title))
-        if len(titles) != 0:
-            keywords = keywords + " , " + ' , '.join(titles)
-        
-        type_query = Q()
-        for type in types:
-            type_query = type_query & (Q(type__icontains=type) | Q(title__icontains=type))
-        if len(types) != 0:
-            keywords = keywords + " , " + ' , '.join(types)
-
-        final_query = loc_query & date_query & title_query & type_query
-
-        find_all_types = Festival.objects.filter(final_query).annotate(total_count=Count('id'))
         list_of_types = []
-        for special_type in find_all_types:
-            if special_type.type not in list_of_types:
-                list_of_types.append(special_type.type)
 
-        print(list_of_types)
+        for string in strings:
 
-        view_data['all_results'] = Festival.objects.filter(final_query)
-        view_data['string'] = string
+            types = []
+            locs,dates,titles = extract_locations_and_dates(string)
+            
+            date_prim = month_search(string)
+            for month in date_prim:
+                if month not in dates:
+                    dates.append(month)
+            
+            caches = get_features(string)
+            for cache in caches:
+                if cache.word not in blacklist_words:
+                    if cache.type == 'title':
+                        if cache.word not in titles:
+                            titles.append(cache.word)
+                    if cache.type == 'address':
+                        if cache.word not in locs:
+                            locs.append(cache.word)
+                    if cache.type == 'date':
+                        if cache.word not in dates:
+                            dates.append(cache.word)
+                    if cache.type == 'type':
+                        if cache.word not in types:
+                            types.append(cache.word)
+
+
+            loc_query = Q()
+            for loc in locs:
+                loc_query = loc_query & Q(address__icontains=loc)
+            if len(locs) != 0:
+                keywords = keywords + " , " + ' , '.join(locs)
+
+            date_query = Q()
+            for date in dates:
+                date_query = date_query & Q(date__icontains=date)
+            if len(dates) != 0:
+                keywords = keywords + " , " + ' , '.join(dates)
+
+            title_query = Q()
+            for title in titles:
+                title_query = title_query & (Q(title__icontains=title) | Q(type__icontains=title))
+            if len(titles) != 0:
+                keywords = keywords + " , " + ' , '.join(titles)
+            
+            type_query = Q()
+            for type in types:
+                type_query = type_query & (Q(type__icontains=type) | Q(title__icontains=type))
+            if len(types) != 0:
+                keywords = keywords + " , " + ' , '.join(types)
+
+            final_query = loc_query & date_query & title_query & type_query
+
+            find_all_types = Festival.objects.filter(final_query).annotate(total_count=Count('id'))
+            
+            for special_type in find_all_types:
+                if special_type.type not in list_of_types:
+                    list_of_types.append(special_type.type)
+
+            inter_statements_query = inter_statements_query | final_query
+
+        
+        print(inter_statements_query)
+
+        view_data['all_results'] = Festival.objects.filter(inter_statements_query)
+        view_data['string'] = main_string
         view_data['keywords'] = keywords[3:]
         view_data['types'] = list_of_types
 
