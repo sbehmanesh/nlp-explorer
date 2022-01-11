@@ -110,17 +110,15 @@
 										<th class="product-name">Name</th>
 										<th class="product-name">Address</th>
 										<th class="product-name">Date</th>
-										<th class="product-name">type</th>
 									</tr>
 								</thead>
 								<tbody>
 									{% for row in all_results %}
-										{% if label == row.type%}
+										{% if label == row.type %}
 											<tr class="table-body-row" style="cursor: pointer;" onclick="window.open('{{ row.link }}', '_blank');">
 												<td class="product-name">{{ row.title }}</td>
 												<td class="product-name">{{ row.address }}</td>
 												<td class="product-name">{{ row.date }}</td>
-												<td class="product-name">{{ row.type }}</td>
 											</tr>
 										{% endif %}
 									{% endfor %}
