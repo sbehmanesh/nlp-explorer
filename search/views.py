@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.db.models import Count
 from django.views.decorators.csrf import csrf_protect 
+import re
 
 list_of_monthes = [
     'january',
@@ -62,37 +63,52 @@ def search(request):
         keywords = ""
         list_of_types = []
         
+
         for and_string in strings:
 
             inter_statements_query = Q()
             or_strings = and_string.split("and")
 
             for string in or_strings:
-
+                locs = []
+                dates = []
+                titles = []
                 types = []
-                locs,dates,titles = extract_locations_and_dates(string)
-                
+                string = string.strip()
+                caches = get_features(string)
+                for cache in caches:
+                    if cache.word not in blacklist_words:
+                        word = clean_string_from_non_alpha_numeric_chars(cache.word)
+                        if cache.type == 'title':
+                            if word not in titles:
+                                titles.append(word)
+                        if cache.type == 'address':
+                            if word not in locs:
+                                locs.append(word)
+                        if cache.type == 'date':
+                            if word not in dates:
+                                dates.append(word)
+                        if cache.type == 'type':
+                            if word not in types:
+                                types.append(word)
+
+                nlp_locs,nlp_dates,nlp_titles = extract_locations_and_dates(string)
+                all_features_cached = locs + dates + titles
+                for word in nlp_locs:
+                    if word not in all_features_cached:
+                        locs.append(word) 
+                for word in nlp_dates:
+                    if word not in all_features_cached:
+                        dates.append(word) 
+                for word in nlp_titles:
+                    if word not in all_features_cached:
+                        titles.append(word) 
+
                 date_prim = month_search(string)
                 for month in date_prim:
                     if month not in dates:
                         dates.append(month)
                 
-                caches = get_features(string)
-                for cache in caches:
-                    if cache.word not in blacklist_words:
-                        if cache.type == 'title':
-                            if cache.word not in titles:
-                                titles.append(cache.word)
-                        if cache.type == 'address':
-                            if cache.word not in locs:
-                                locs.append(cache.word)
-                        if cache.type == 'date':
-                            if cache.word not in dates:
-                                dates.append(cache.word)
-                        if cache.type == 'type':
-                            if cache.word not in types:
-                                types.append(cache.word)
-
 
                 loc_query = Q()
                 for loc in locs:
@@ -119,7 +135,6 @@ def search(request):
                     keywords = keywords + " , " + ' , '.join(types)
 
                 final_query = loc_query & date_query & title_query & type_query
-
                 inter_statements_query = inter_statements_query | final_query
 
             complete_query = complete_query & inter_statements_query
@@ -130,8 +145,9 @@ def search(request):
         for special_type in find_all_types:
             if special_type.type not in list_of_types:
                 list_of_types.append(special_type.type)
-        
-        view_data['all_results'] = Festival.objects.filter(inter_statements_query)
+
+        print(Festival.objects.filter(complete_query).query)
+        view_data['all_results'] = Festival.objects.filter(complete_query)
         view_data['string'] = main_string
         view_data['keywords'] = keywords[3:]
         view_data['types'] = list_of_types
@@ -142,8 +158,8 @@ def search(request):
 def split_string_according_to_prepositions(string):
     exploded_by_in = string.split("in")
     and_strings = []
-    for sub_string in exploded_by_in :
-        exploded_by_at = sub_string.split("at")
+    for sub_string in exploded_by_in:
+        exploded_by_at = sub_string.strip().split("at")
         and_strings = and_strings + exploded_by_at
 
     return and_strings
@@ -151,7 +167,9 @@ def split_string_according_to_prepositions(string):
 
 def clean_string_from_non_alpha_numeric_chars(string):
     # clean input string from non alpha-numeric characters
-    clean_string = filter(lambda x: x.isalnum() or x.isspace(), string)
+    pattern = r'(?<!\d)\d{2}(?!\d)'
+    no_2digit_number_in_string = re.sub(pattern, '', string)
+    clean_string = filter(lambda x: x.isalnum() or x.isspace(), no_2digit_number_in_string)
     clean_string = "".join(clean_string)
     return clean_string
 
@@ -164,11 +182,14 @@ def extract_locations_and_dates(string):
     title = []
     for chunk in doc.ents:
         if chunk.label_ in ['LOC','GPE']:
-            locations.append(chunk.text)
+            splited = chunk.text.split(' ')
+            locations.extend(splited)
         elif chunk.label_ == 'DATE':
-            dates.append(chunk.text)
+            splited = chunk.text.split(' ')
+            dates.extend(splited)
         else:
-            title.append(chunk.text)
+            splited = chunk.text.split(' ')
+            title.extend(splited)
 
     return locations,dates,title
 
