@@ -146,7 +146,7 @@ def search(request):
             if special_type.type not in list_of_types:
                 list_of_types.append(special_type.type)
 
-        print(Festival.objects.filter(complete_query).query)
+        # print(Festival.objects.filter(complete_query).query)
         view_data['all_results'] = Festival.objects.filter(complete_query)
         view_data['string'] = main_string
         view_data['keywords'] = keywords[3:]
@@ -263,10 +263,10 @@ def extract_features_from_data():
                     already_added_type.append(word)
                     Features(word=word,type='type').save()
 
-    print('number of title features added : '  ,len(already_added_title))
-    print('number of address features added : ',len(already_added_address))
-    print('number of date features added : '   ,len(already_added_date))
-    print('number of type features added : '   ,len(already_added_type))
+    # print('number of title features added : '  ,len(already_added_title))
+    # print('number of address features added : ',len(already_added_address))
+    # print('number of date features added : '   ,len(already_added_date))
+    # print('number of type features added : '   ,len(already_added_type))
 
 
 def month_search(string):
