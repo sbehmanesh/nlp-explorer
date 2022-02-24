@@ -2793,3 +2793,13 @@ table.order-details tbody td {
     max-width: 1500px;
   }
 }
+
+.route {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.routingIcon {
+  width: 40px;
+  display: block;
+}
