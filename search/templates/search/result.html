@@ -125,18 +125,10 @@
 								<tbody>
 									{% for row in all_results %}
 										{% if label == row.type %}
-											<tr class="table-body-row" style="cursor: pointer;" onclick="window.open('{{ row.link }}', '_blank');">
+											<tr class="table-body-row" style="cursor: pointer;" onclick="showRoute({{ row.lat }},{{ row.long }});window.open('{{ row.link }}', '_blank');">
 												<td class="product-name">{{ row.title }}</td>
 												<td class="product-name">{{ row.address }}</td>
 												<td class="product-name">{{ row.date }}</td>
-												<td class="product-name text-center">
-													<center>
-														<span onclick="event.stopPropagation();showRoute({{ row.lat }},{{ row.long }});" class="route">
-															<img src="/static/img/route.svg" class="routingIcon"/>
-															Route to event
-														</span>
-													</center>
-												</td>
 											</tr>
 										{% endif %}
 									{% endfor %}
@@ -157,7 +149,7 @@
 
 	<!-- leaflet js map initialization -->
 	<script>
-		var userLat = 0,userLong = 0;
+		var userLat = 43.661043341854224,userLong = -79.39597803464152;
 		var destLat = 0,destLong = 0;
 		
 		var locations = [
@@ -192,11 +184,15 @@
 		});
 
 		function showRoute(lat , long) {
-			document.getElementById('routeAlert').style.display = 'block';
-			document.getElementById('map').style.cursor = 'pointer';
 			destLat = lat;
 			destLong = long;
-			document.getElementById('map').focus();
+			L.Routing.control({
+				waypoints: [
+					L.latLng(userLat, userLong),
+					L.latLng(destLat, destLong)
+				]
+			}).addTo(map);
+			
 		}
 
 	</script>
