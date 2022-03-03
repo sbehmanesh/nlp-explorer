@@ -108,6 +108,9 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-5 col-md-12">
+					{% if not types %}
+						<h3>No record found</h3>
+					{% else %}
 					{% for label in types %}
 						<h4 style="margin-top:10px">
 							{{ label }}
@@ -119,7 +122,6 @@
 										<th class="product-name">Name</th>
 										<th class="product-name">Address</th>
 										<th class="product-name">Date</th>
-										<th class="product-name">routing</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -136,6 +138,7 @@
 							</table>
 						</div>
 					{% endfor %}
+					{% endif %}
 				</div>
 
 				<div class="col-lg-7">

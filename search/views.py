@@ -147,10 +147,15 @@ def search(request):
                 list_of_types.append(special_type.type)
 
         # print(Festival.objects.filter(complete_query).query)
-        view_data['all_results'] = Festival.objects.filter(complete_query)
-        view_data['string'] = main_string
         view_data['keywords'] = keywords[3:]
-        view_data['types'] = list_of_types
+        if view_data['keywords']:
+            view_data['all_results'] = Festival.objects.filter(complete_query)
+            view_data['types'] = list_of_types
+        else:
+            view_data['all_results'] = None
+            view_data['types'] = None
+
+        view_data['string'] = main_string
 
     return render(request, 'search/result.html', view_data)
 
