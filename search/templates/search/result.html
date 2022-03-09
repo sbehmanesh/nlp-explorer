@@ -176,15 +176,15 @@
           marker.addTo(map);   
 	    }
 
-		map.on('click', function(e) {
-			document.getElementById('routeAlert').style.display = 'none';
-			L.Routing.control({
-				waypoints: [
-					L.latLng(e.latlng.lat, e.latlng.lng),
-					L.latLng(destLat, destLong)
-				]
-			}).addTo(map);
-		});
+		// map.on('click', function(e) {
+		// 	document.getElementById('routeAlert').style.display = 'none';
+		// 	L.Routing.control({
+		// 		waypoints: [
+		// 			L.latLng(e.latlng.lat, e.latlng.lng),
+		// 			L.latLng(destLat, destLong)
+		// 		]
+		// 	}).addTo(map);
+		// });
 
 		function showRoute(lat , long) {
 			destLat = lat;
